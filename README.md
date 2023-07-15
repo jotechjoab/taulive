@@ -1,2 +1,2 @@
 # taulive
-This the tree tracking webapp for tree adoption uganda
+This is the tree tracking webapp for tree adoption uganda
