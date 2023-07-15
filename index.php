@@ -95,11 +95,7 @@
 
     <?php
 
-    $dbhost = 'localhost';
-    $dbuser = 'root';
-    $dbpass = '';
-    $dbname = 'tau';
-    $mysqli = new mysqli($dbhost, $dbuser, $dbpass, $dbname);
+  require 'conn.php';
 
 
     if (isset($_GET['tree_no'])) {
