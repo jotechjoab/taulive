@@ -6,10 +6,10 @@
   <title>Tree Adoption Uganda Track Your Trees On a Live Map</title>
   <meta name='viewport' content='width=device-width, initial-scale=1' />
   <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
- <!--  <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v2.9.2/mapbox-gl.js'></script>
+  <!--  <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v2.9.2/mapbox-gl.js'></script>
   <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v2.9.2/mapbox-gl.css' rel='stylesheet' /> -->
   <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet">
-<script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
+  <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
   <style>
     body {
@@ -43,15 +43,48 @@
     }
 
     .element-with-timer {
-      /*height: 100%;*/
+
       padding: 50px;
       position: absolute;
       z-index: 10;
-      margin-top: 400px;
+      margin-top: 300px;
       margin-left: 50px;
       background: #020202cf;
       color: #FFF;
       border-radius: 20px;
+    }
+
+
+
+    @media (max-width: 768px) {
+      .element-with-timer {
+        padding: 5px;
+        /* Reduce padding for smaller screens */
+      }
+
+      .search-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: #020202cf;
+        color: #FFF;
+        border-radius: 20px;
+        padding: 5px;
+        /* Add padding for better visual appearance */
+      }
+
+      input[type="text"] {
+        width: 100%;
+        /* Make the input field fill the available space */
+        max-width: 200px;
+        /* Limit the maximum width of the input field */
+        height: 30px;
+      }
+
+      button {
+        height: 30px;
+        width: 30px;
+      }
     }
   </style>
 </head>
@@ -63,7 +96,11 @@
       <input type="text" name="tree_no" style="height: 30px; width: 200px;" placeholder="Enter Your Tree Code Here "><button style="height: 36px; width: 36px; margin-left: 10px;" type="submit">Go</button>
       <p> <small><i>Eg. TAU_500</i></small></p>
       <span id="msg"></span>
+      <span id="notice"></span>
+     
+     
     </form>
+     <button onclick="share()">Share</button>
   </div>
   <div id='map'>
 
@@ -74,11 +111,16 @@
 
     const map = new mapboxgl.Map({
       container: 'map',
+      projection: 'globe',
       // style: 'mapbox://styles/mapbox/streets-v11',
       // mapbox://styles/mapbox/satellite-v9
       style: 'mapbox://styles/mapbox/streets-v12',
       center: [32.4950852685138, 0.6376670430058137],
-      zoom: 2
+      zoom: <?php if (isset($_GET['tree_no'])) {
+              echo 14;
+            } else {
+              echo 2;
+            } ?>
     });
     // Add geolocate control to the map.
     map.addControl(
@@ -95,7 +137,7 @@
 
     <?php
 
-  require 'conn.php';
+    require 'conn.php';
 
 
     if (isset($_GET['tree_no'])) {
@@ -160,14 +202,19 @@
 
       const params = {
         access_token: mapboxgl.accessToken,
-        types: 'place',
+        types: 'address',
         limit: 1,
       };
 
       $.getJSON(geocodingEndpoint, params, function(data) {
         if (data.features.length > 0) {
-          const placeName = data.features[0].place_name;
-          callback(placeName);
+          const place = data.features[0];
+          const addressComponents = place.context.map(component => component.text);
+          const formattedAddress = addressComponents.join(',');
+
+
+          callback(formattedAddress);
+          console.log("Address=" + formattedAddress);
         } else {
           callback(null);
         }
@@ -204,6 +251,7 @@
               date_of_planting: "<?php echo $date_of_planting; ?>",
               image_url: "<?php echo $image_url; ?>",
               cordinates: "<?php echo $coodinates; ?>",
+              address: "<?php echo $coodinates; ?>",
             }
           },
         <?php
@@ -238,11 +286,96 @@
 <p>Tree Planter: <b>${feature.properties.description}</b></p>
 <p>Date Of Planting : <b>${feature.properties.date_of_planting}</b></p>
 <p>Coordinates : <b>${feature.properties.cordinates}</b></p>
+<p>Address : <b>${feature.properties.address}</b></p>
 `
           )
         )
         .addTo(map);
     }
+
+    map.on('style.load', () => {
+      map.setFog({}); // Set the default atmosphere style
+    });
+
+    // The following values can be changed to control rotation speed:
+
+    // At low zooms, complete a revolution every two minutes.
+    const secondsPerRevolution = 120;
+    // Above zoom level 5, do not rotate.
+    const maxSpinZoom = 5;
+    // Rotate at intermediate speeds between zoom levels 3 and 5.
+    const slowSpinZoom = 3;
+
+    let userInteracting = false;
+    let spinEnabled = true;
+
+    function spinGlobe() {
+      const zoom = map.getZoom();
+      if (spinEnabled && !userInteracting && zoom < maxSpinZoom) {
+        let distancePerSecond = 360 / secondsPerRevolution;
+        if (zoom > slowSpinZoom) {
+          // Slow spinning at higher zooms
+          const zoomDif =
+            (maxSpinZoom - zoom) / (maxSpinZoom - slowSpinZoom);
+          distancePerSecond *= zoomDif;
+        }
+        const center = map.getCenter();
+        center.lng -= distancePerSecond;
+        // Smoothly animate the map over one second.
+        // When this animation is complete, it calls a 'moveend' event.
+        map.easeTo({
+          center,
+          duration: 1000,
+          easing: (n) => n
+        });
+      }
+    }
+
+    // Pause spinning on interaction
+    map.on('mousedown', () => {
+      userInteracting = true;
+    });
+
+    // Restart spinning the globe when interaction is complete
+    map.on('mouseup', () => {
+      userInteracting = false;
+      spinGlobe();
+    });
+
+    // These events account for cases where the mouse has moved
+    // off the map, so 'mouseup' will not be fired.
+    map.on('dragend', () => {
+      userInteracting = false;
+      spinGlobe();
+    });
+    map.on('pitchend', () => {
+      userInteracting = false;
+      spinGlobe();
+    });
+    map.on('rotateend', () => {
+      userInteracting = false;
+      spinGlobe();
+    });
+
+    // When animation is complete, start spinning if there is no ongoing interaction
+    map.on('moveend', () => {
+      spinGlobe();
+    });
+
+function share(){
+    var dummy = document.createElement('input'),
+    text = window.location.href;
+
+document.body.appendChild(dummy);
+dummy.value = text;
+dummy.select();
+document.execCommand('copy');
+document.body.removeChild(dummy);
+
+ var msg=document.getElementById("notice");
+ msg.innerHTML="A sharable link has been copied to your clipboard";
+
+}
   </script>
 
 </body>
