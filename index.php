@@ -6,11 +6,13 @@
   <title>Tree Adoption Uganda Track Your Trees On a Live Map</title>
   <meta name='viewport' content='width=device-width, initial-scale=1' />
   <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
   <!--  <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v2.9.2/mapbox-gl.js'></script>
   <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v2.9.2/mapbox-gl.css' rel='stylesheet' /> -->
   <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet">
   <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.min.js" integrity="sha384-cuYeSxntonz0PPNlHhBs68uyIAVpIIOZZ5JqeqvYYIcEL727kskC66kF92t6Xl2V" crossorigin="anonymous"></script>
   <style>
     body {
       margin: 0;
@@ -34,7 +36,7 @@
     }
 
     .mapboxgl-popup {
-      max-width: 300px;
+      max-width: 500px;
     }
 
     .mapboxgl-popup-content {
@@ -42,55 +44,91 @@
       font-family: 'Open Sans', sans-serif;
     }
 
-    .element-with-timer {
+    .header {
 
       padding: 50px;
       position: absolute;
       z-index: 10;
-      margin-top: 300px;
+      margin-top: 100px;
       margin-left: 50px;
       background: #020202cf;
       color: #FFF;
       border-radius: 20px;
+      max-width: 568px;
     }
 
 
 
-    @media (max-width: 768px) {
-      .element-with-timer {
+    @media (max-width:568px) {
+      .header {
         padding: 5px;
         /* Reduce padding for smaller screens */
       }
+
+         .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background-color: #020202cf;
+      color: #FFF;
+      padding: 10px;
+      border-radius: 20px;
+      margin: 10px;
+    }
+
 
       .search-container {
         display: flex;
         justify-content: center;
         align-items: center;
-        background-color: #020202cf;
+        /*background-color: #020202cf;*/
         color: #FFF;
         border-radius: 20px;
         padding: 5px;
         /* Add padding for better visual appearance */
       }
 
+
+
       input[type="text"] {
-        width: 100%;
+        /*width: 100%;*/
         /* Make the input field fill the available space */
-        max-width: 200px;
+        /*max-width: 200px;*/
         /* Limit the maximum width of the input field */
-        height: 30px;
+        /*height: 30px;*/
       }
 
-      button {
+  /*    button {
         height: 30px;
         width: 30px;
-      }
+      }*/
     }
   </style>
 </head>
 
 <body>
-  <div class="element-with-timer">
+    <div class="header">
+      <div class="row">
+    <h5 style="text-align: center;"><b>Track Your Trees On a Live Map</b></h5>
+    <div class="search-container col-md-12">
+      <form method="GET" action="">
+        <div class="row">
+        <div class="form-group col-md-6">
+        <input type="text" name="tree_no" placeholder="Enter Your Tree Code Here" class="form-control">
+      </div>
+      <div class="form-group col-md-4">
+        <button type="submit" class="btn btn-primary">Go</button>
+      </div>
+    </div>
+      </form>
+      
+    </div>
+    <div class="form-group col-md-12"><small><i>Eg. TAU_500</i></small></div>
+    <div class="col-md-12"><button onclick="share()" class="btn btn-success btn-sm">Share</button></div>
+    <span id="notice"></span>
+  </div>
+  </div>
+  <!-- <div class="element-with-timer">
     <h3>Track Your Trees On a Live Map </h3>
     <form method="GET" action="">
       <input type="text" name="tree_no" style="height: 30px; width: 200px;" placeholder="Enter Your Tree Code Here "><button style="height: 36px; width: 36px; margin-left: 10px;" type="submit">Go</button>
@@ -101,7 +139,7 @@
      
     </form>
      <button onclick="share()">Share</button>
-  </div>
+  </div> -->
   <div id='map'>
 
   </div>
@@ -153,9 +191,9 @@
 
 
     ?>
-        var msg = document.getElementById("msg");
-        msg.style.color = "#FFF";
-        msg.innerHTML = "<h3>Tree Details</h3> <div style='text-align:left;'><p>Tree Name: <b> <?php echo $row1['name_of_tree']; ?></b></p><p>Tree Planter: <b><?php echo $row1['planter']; ?></b></p><p>Date Of Planting : <b><?php echo $row1['date_of_planting']; ?></b></p><p>Coordinates : <b><?php echo  $row1['coodinates']; ?></b></p>";
+        // var msg = document.getElementById("msg");
+        // msg.style.color = "#FFF";
+        // msg.innerHTML = "<h3>Tree Details</h3> <div style='text-align:left;'><p>Tree Name: <b> <?php echo $row1['name_of_tree']; ?></b></p><p>Tree Planter: <b><?php echo $row1['planter']; ?></b></p><p>Date Of Planting : <b><?php echo $row1['date_of_planting']; ?></b></p><p>Coordinates : <b><?php echo  $row1['coodinates']; ?></b></p>";
 
         // Set the center of the map to the specific tree coordinates
         map.setCenter([<?php echo $longitude1; ?>, <?php echo $latitude1; ?>]);
@@ -182,16 +220,16 @@
     $t_no = $_GET['tree_no'];
     $sql = "SELECT * FROM trees  WHERE tracking_code='$treeNo'";
   } else {
-    $sql = "SELECT * FROM trees  ORDER BY created_at DESC LIMIT 100";
+    $sql = "SELECT * FROM trees  ORDER BY created_at DESC LIMIT 1";
   }
 
   $result = $mysqli->query($sql);
 
   if ($result->num_rows > 0) {
   } else {
-    echo '<script> var msg=document.getElementById("msg");
-          msg.innerHTML="Sorry No Records found";
-          msg.style.color = "magenta";</script>';  // printf('Unexpected Error. DB did not return enough values for a successful export.<br />');
+  //   echo '<script> var msg=document.getElementById("msg");
+  //         msg.innerHTML="Sorry No Records found";
+  //         msg.style.color = "magenta";</script>';  // printf('Unexpected Error. DB did not return enough values for a successful export.<br />');
   }
 
   ?>
@@ -281,12 +319,13 @@
           .setHTML(
             `<h3>Tree Details</h3>
 <img src="../app/${feature.properties.image_url}" style="width:200px; height:200px;">
-<div style="text-align:left;">
+<div style="text-align:left; style="width:200px;">
 <p>Tree Name: <b> ${feature.properties.title}</b></p>
 <p>Tree Planter: <b>${feature.properties.description}</b></p>
 <p>Date Of Planting : <b>${feature.properties.date_of_planting}</b></p>
 <p>Coordinates : <b>${feature.properties.cordinates}</b></p>
 <p>Address : <b>${feature.properties.address}</b></p>
+</div>
 `
           )
         )
@@ -361,6 +400,42 @@
     map.on('moveend', () => {
       spinGlobe();
     });
+
+    function openPopupOnLoad(feature) {
+  const el = document.createElement('div');
+  el.className = 'marker';
+
+  new mapboxgl.Marker(el)
+    .setLngLat(feature.geometry.coordinates)
+    .setPopup(
+      new mapboxgl.Popup({
+        offset: 25
+      })
+      .setHTML(
+        `<h3>Tree Details</h3>
+<img src="../app/${feature.properties.image_url}" style="width:200px; height:200px;">
+<div style="text-align:left;">
+<p>Tree Name: <b> ${feature.properties.title}</b></p>
+<p>Tree Planter: <b>${feature.properties.description}</b></p>
+<p>Date Of Planting : <b>${feature.properties.date_of_planting}</b></p>
+<p>Coordinates : <b>${feature.properties.cordinates}</b></p>
+<p>Address : <b>${feature.properties.address}</b></p>
+`
+      )
+    )
+    .addTo(map)
+    .togglePopup(); // Automatically open the popup
+
+  map.off('style.load', openPopupOnLoad); // Remove the event listener after the first trigger
+}
+
+// Attach the 'style.load' event listener
+map.on('style.load', () => {
+  map.setFog({}); // Set the default atmosphere style
+  for (const feature of geojson.features) {
+    openPopupOnLoad(feature);
+  }
+});
 
 function share(){
     var dummy = document.createElement('input'),

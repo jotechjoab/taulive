@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    /* Your existing CSS styles */
+
+    /* Additional styles for the header toolbar */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background-color: #020202cf;
+      color: #FFF;
+      padding: 10px;
+      border-radius: 20px;
+      margin: 10px;
+    }
+
+    .search-container {
+      display: flex;
+      align-items: center;
+    }
+
+    input[type="text"] {
+      width: 200px;
+      height: 30px;
+      margin-right: 10px;
+    }
+
+    button {
+      height: 36px;
+      width: 36px;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h3>Track Your Trees On a Live Map</h3>
+    <div class="search-container">
+      <form method="GET" action="">
+        <input type="text" name="tree_no" placeholder="Enter Your Tree Code Here">
+        <button type="submit">Go</button>
+      </form>
+      <p><small><i>Eg. TAU_500</i></small></p>
+    </div>
+  </div>
+  <!-- Rest of your content -->
+</body>
+</html>
